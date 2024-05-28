@@ -1,0 +1,76 @@
+// Define some layers
+input = linear(28 * 28, 512);
+hidden = linear(512, 300);
+output = linear(300, 20);
+
+sequential_model = sequential(input -> ReLU -> hidden -> Sigmoid -> output);
+
+size = 20;
+
+loop {
+    if size == 10 {
+        break;
+    } else {
+        sequential_model = sequential(sequential_model -> ReLU -> linear (size, size - 1));
+
+        size = size - 1;
+    }
+}
+
+
+// Export un-trained model
+export model sequential_model as "model";
+
+train {
+    import data "MNISTDigits" as MNISTDigits;
+    import data "MNISTDigitsTest" as MNISTDigitsTest;
+
+    learning_rate = 0.01;
+
+    epoch = 0;
+
+    // Training sequential model
+    loop {
+        // Create predictions for the entire training set
+        train_prediction = sequential_model(MNISTDigits);
+        // Calculate loss for the predictions
+        loss = CE(train_prediction, MNISTDigits);
+
+        // Optimize the model using SGD
+        SGD(sequential_model, loss, learning_rate);
+
+        // Test the model
+        test_prediction = sequential_model(MNISTDigitsTest);
+        accuracy = calculate_accuracy(test_prediction, MNISTDigitsTest);
+        loss = CE(test_prediction, MNISTDigitsTest);
+
+        print("Loss: ");
+        print(loss);
+        print(", Accuracy: ");
+        print(accuracy);
+
+        if accuracy > 0.8 or epoch > 10 {
+            break;
+        }
+
+        epoch = epoch + 1;
+    }
+
+    // Export trained model
+    export model sequential_model as "trained_model";
+}
+
+manual_model = sequential(linear(10, 20) -> ReLU -> linear(20, 5) -> linear(5, 10));
+
+train {
+    //Creating a prediction manually
+    prediction = manual_model([(5.0/7) * 2, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 4.0, 10.0, 5.0 + 1 * 2.0]);
+    learning_rate = 0.01;
+
+    loss = MSE(prediction, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0]);
+
+    SGD(sequential_model, loss, learning_rate);
+
+    // Export trained model
+    export model sequential_model as "trained_model";
+}

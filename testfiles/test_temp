@@ -1,0 +1,4 @@
+test = ReLU;
+
+test_2 = sequential(linear(1, 2) -> test -> linear(2, 1) -> ReLU -> linear(1, 1));
+test_2 = sequential(test_2 -> linear(1, 2) -> test -> linear(2, 1) -> ReLU -> linear(1, 1));

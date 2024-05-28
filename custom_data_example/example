@@ -1,0 +1,21 @@
+seq_model = sequential(linear(3, 10) -> ReLU -> linear(10, 3));
+
+train {
+    import data "custom_data.csv" as custom_data;
+    epoch = 0;
+    loop {
+        train_prediction = seq_model(custom_data);
+        loss = CE(train_prediction, custom_data);
+        SGD(seq_model, loss, 0.01);
+
+        print("Loss: ");
+        print(loss);
+
+        if epoch > 10 {
+            break;
+        }
+
+        epoch = epoch + 1;
+    }
+    export model seq_model as "trained_model";
+}

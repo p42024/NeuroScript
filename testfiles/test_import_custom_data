@@ -1,0 +1,15 @@
+test_model = sequential(linear(3, 2) -> ReLU -> linear(2, 1));
+
+train {
+    import data "train_data" as training_data;
+
+    test = test_model(training_data);
+    print(test);
+}
+
+// Save this to csv
+// feature1,feature2,feature3,target
+// 0.1,0.2,0.3,0
+// 0.4,0.5,0.6,1
+// 0.7,0.8,0.9,0
+// 1.0,1.1,1.2,1

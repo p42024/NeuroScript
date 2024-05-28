@@ -1,0 +1,47 @@
+size = 20;
+sequential_model = sequential (linear (28 * 28, size));
+
+loop {
+    if size == 10 {
+        break;
+    }
+
+    sequential_model = sequential (sequential_model -> ReLU -> linear (size, size - 1));
+
+    size = size - 1;
+}
+
+train {
+    training_data_placeholder = 1;
+    test_data_placeholder = 1;
+    learning_rate = 0.01;
+
+    epoch = 0;
+    print("Starting training...");
+    // Training sequential model
+    loop {
+        // Create predictions for the entire training set
+        train_prediction = sequential_model(training_data_placeholder);
+        // Calculate loss for the predictions
+        loss = MSE(train_prediction, training_data_placeholder);
+
+        // Optimize the model using SGD
+        SGD(sequential_model, loss, learning_rate);
+
+        // Test the model
+        test_prediction = sequential_model(test_data_placeholder);
+        accuracy = calculate_accuracy(test_prediction, test_data_placeholder);
+        loss = MSE(test_prediction, test_data_placeholder);
+
+        print("Loss: ");
+        print(loss);
+        print(", Accuracy: ");
+        print(accuracy);
+
+        if accuracy > 0.8 or epoch > 10 {
+            break;
+        }
+
+        epoch = epoch + 1;
+    }
+}
